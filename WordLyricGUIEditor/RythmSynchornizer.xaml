@@ -1,0 +1,37 @@
+﻿<UserControl
+    x:Class="WordLyricGUIEditor.RythmSynchornizer"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WordLyricGUIEditor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <Grid>
+        <StackPanel>
+            <TextBlock Margin="5">对拍器(单位:ms)</TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center">对齐时间：</TextBlock>
+                <TextBox VerticalAlignment="Center" x:Name="TimeAlignTextBox" TextChanged="TimeAlignTextBox_TextChanged" InputScope="Digits" />
+                <Button Content="对齐" ClickMode="Press" Click="TimeAlignButtonClick"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+
+                <TextBlock VerticalAlignment="Center">间隔时间：</TextBlock>
+                <TextBox VerticalAlignment="Center" InputScope="Digits" x:Name="SyncLoopTimeTextBox" TextChanged="SyncLoopTimeTextBox_TextChanged"/>
+                <Button Content="起新拍" Click="NewLoopButtonClick"/>
+                <Button Content="对拍" ClickMode="Press" Click="SyncLoopButtonClick"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center">添加监视条</TextBlock>
+                <TextBox InputScope="Number" VerticalAlignment="Center" Text="1" x:Name="NewBarFactorTextBox"/>
+                <Button Margin="5" Content="添加" Click="NewBarMultiButtonClick"/>
+            </StackPanel>
+
+            <StackPanel x:Name="BarPanel">
+
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
