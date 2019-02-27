@@ -14,6 +14,11 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Media.Audio;
+using Windows.Media.Playback;
+using Windows.Storage.Streams;
+using Windows.Media;
+using Windows.Media.Core;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -24,10 +29,10 @@ namespace WordLyricGUIEditor
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        LibVLCSharp.Shared.LibVLC libVLC;
-        LibVLCSharp.Shared.Media media;
-        public LibVLCSharp.Shared.MediaPlayer player;
         WordLyric.WordLyricAdapter lyricAdapter;
+        MediaPlayer player;
+        MediaTimelineController controller;
+        
 
         string logFolder;
         
@@ -35,12 +40,12 @@ namespace WordLyricGUIEditor
         {
             this.InitializeComponent();
             InitializeLogStorage();
-            InitializeLibVLC();
+            InitializeNAudio();
             InitializeWordLyricAdapter();
             InitializeRythmSyncComponent();
             InitializeUIUpdate();
 
-
+            
         }
         #region RythmSync
         private void InitializeRythmSyncComponent()
@@ -71,41 +76,33 @@ namespace WordLyricGUIEditor
         #endregion
 
         #region VLC
-        private void InitializeLibVLC()
+        private void InitializeNAudio()
         {
-            LibVLCSharp.Shared.Core.Initialize(Directory.GetCurrentDirectory());
-            libVLC = new LibVLCSharp.Shared.LibVLC();
-            libVLC.SetLogFile(Path.Combine(logFolder,"libvlc.log"));
+            player = new MediaPlayer();
 
-            player = new LibVLCSharp.Shared.MediaPlayer(libVLC);
 
-            player.SetVolumeCallback((IntPtr data, float volume, bool mute) => {
-                VolumeSlider.Value = volume * 100;
-            });
-
-            player.TimeChanged += (s, e) =>
+            player.PlaybackSession.NaturalDurationChanged += async (s, o) =>
             {
-                mLastPlayTimeInfoMutex.EnterWriteLock();
-                try
-                {
-                    mLastPlayTimeInfo.sysclock = DateTime.Now;
-                    mLastPlayTimeInfo.timems = player.Time;
-                }
-                finally
-                {
-                    mLastPlayTimeInfoMutex.ExitWriteLock();
-                }
-
-                if(PlayStopTime >=0 && player.Time >= PlayStopTime)
-                {
-                    PlayStopTime = -1;
-                    player.SetPause(true);
-                }
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+                 {
+                     ProgressSlider.Maximum = s.NaturalDuration.TotalMilliseconds;
+                 });
             };
+
+            player.Volume = VolumeSlider.Value / 100;
+
+            /*
+            player.VolumeChanged += (mp, s) =>
+            {
+                //VolumeSlider.Value = mp.Volume * 100;
+            };
+            */
+            controller = player.TimelineController = new Windows.Media.MediaTimelineController();
         }
 
         private void UnLoadMedia()
         {
+            /*
             if(media != null)
             {
                 player.Media = null;
@@ -113,54 +110,44 @@ namespace WordLyricGUIEditor
                 media = null;
 
             }
+            */
             //UpdateUI();
         }
 
-        private void LoadMedia(string mediapath,Stream stream)
+        private async Task LoadMedia(Windows.Storage.StorageFile mediapath)
         {
-            LogPrint($"Load media at [{mediapath}]");
+            LogPrint($"Load media at [{mediapath.Path}]");
             UnLoadMedia();
-            media = new LibVLCSharp.Shared.Media(libVLC, stream);
-            player.Media = media;
+
+            //player.SetMediaSource(FFmpegInterop.FFmpegInteropMSS.CreateFFmpegInteropMSSFromStream(stream, true, false).GetMediaStreamSource());
+            /*
+            FFmpegInterop.FFmpegInteropMSS mss = FFmpegInterop.FFmpegInteropMSS.CreateFFmpegInteropMSSFromStream(await mediapath.OpenReadAsync(), true, false);
+            MediaStreamSource source = mss.GetMediaStreamSource();
+            source.BufferTime = source.Duration;
+            source.CanSeek = true;
             
-            if (player != null)
-                player.Volume = (int)VolumeSlider.Value;
+            player.Source = MediaSource.CreateFromMediaStreamSource(source);
+            */
+            player.Source = MediaSource.CreateFromStorageFile(mediapath); //MediaSource.CreateFromMediaStreamSource(FFmpegInterop.FFmpegInteropMSS.CreateFFmpegInteropMSSFromStream(stream, true, false).GetMediaStreamSource());
             
             UpdateUI();
         }
-        private class LastPlayTimeInfo
-        {
-            public long timems;
-            public DateTime sysclock;
-        };
-        LastPlayTimeInfo mLastPlayTimeInfo = new LastPlayTimeInfo() { timems = 0,sysclock = DateTime.Now };
-        ReaderWriterLockSlim mLastPlayTimeInfoMutex = new ReaderWriterLockSlim();
+
         public long GetNowTimeMs()
         {
-            //VLC的player.Time不是实时时间，需要自己脑部一部分时间
-
-            mLastPlayTimeInfoMutex.EnterReadLock();
-            try
-            {
-                return (long)((player?.IsPlaying ?? false ?
-                    (DateTime.Now - mLastPlayTimeInfo.sysclock) 
-                    : TimeSpan.FromMilliseconds(0))
-                    .Milliseconds * (player?.Rate ?? 0)+ mLastPlayTimeInfo.timems);
-            }
-            finally
-            {
-                mLastPlayTimeInfoMutex.ExitReadLock();
-            }
+            return (long)controller.Position.TotalMilliseconds;
+        }
+        public MediaPlaybackState GetPlayStatus()
+        {
+            return player?.PlaybackSession?.PlaybackState ?? MediaPlaybackState.None;
         }
 
-
-        private long PlayStopTime = -1;
         public void PlayBetween(long startms,long endms)
         {
-            PlayStopTime = endms;
-            player.Time = startms;
-            player.Play();
-            
+            LogPrint($"bet {startms} {endms}");
+            controller.Duration = TimeSpan.FromMilliseconds(endms);
+            controller.Resume();
+            controller.Position = TimeSpan.FromMilliseconds(startms);
         }
         #endregion
 
@@ -189,7 +176,7 @@ namespace WordLyricGUIEditor
 
             LrcUpdateTimer.Tick += (s, e) =>
             {
-                if (player?.IsPlaying ?? false)
+                if (player?.PlaybackSession?.PlaybackState == MediaPlaybackState.Playing)
                 {
                     //LogPrint($"media seek to {player.Time / 1000f}");
                     UpdateLyricProgress();
@@ -197,7 +184,7 @@ namespace WordLyricGUIEditor
                 else
                 {
                     LrcUpdateTimer.Stop();
-                    LogPrint("media player State:" + player?.State.ToString()??"NO PLAYER");
+                    LogPrint("media player State:" + (player?.PlaybackSession?.PlaybackState)?.ToString()??"NO PLAYER");
                 }
             };
         }
@@ -226,7 +213,7 @@ namespace WordLyricGUIEditor
             
             if(file != null)
             {
-                LoadMedia(file.Path,await file.OpenStreamForReadAsync());
+                await LoadMedia(file);
             }
         }
         private async void LoadLyricButtonClick(object sender, RoutedEventArgs e)
@@ -236,9 +223,10 @@ namespace WordLyricGUIEditor
             picker.FileTypeFilter.Add(".lrc");
 
             Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
-            LogPrint($"Load lyric {file.Path}");
+           
             if (file != null)
             {
+                LogPrint($"Load lyric {file.Path}");
                 LogPrint($"Lyric will load.");
                 var stream = await file.OpenStreamForReadAsync();
 
@@ -266,29 +254,34 @@ namespace WordLyricGUIEditor
         }
         private void StopButtonClick(object sender, RoutedEventArgs e)
         {
-            player?.Stop();
+            if(player != null)
+            {
+                player?.TimelineController?.Pause();
+                controller.Position = TimeSpan.Zero;
+            }
+
             UpdateUI();
             UpdateLyricProgress();
         }
 
         private void PlayButtonClick(object sender, RoutedEventArgs e)
         {
-            if (player != null)
-                player.Volume =(int) VolumeSlider.Value;
-            player?.Play();
-            if (player != null)
-                player.Volume = (int)VolumeSlider.Value;
+            controller.Pause();
+            TimeSpan oldtime = controller.Position;
+            controller.Duration = null;
+            controller.Resume();
+            controller.Position = oldtime;
             LrcUpdateTimer.Start();
         }
 
         private void PauseButtonClick(object sender, RoutedEventArgs e)
         {
-            player?.Pause();
+            player?.TimelineController?.Pause();
         }
         private void VolumeSliderSlide(object sender, RangeBaseValueChangedEventArgs e)
         {
             if (player != null)
-                player.Volume = (int)VolumeSlider.Value;
+                player.Volume = VolumeSlider.Value / 100;
         }
 
         private void MusicPlayerRateTextBoxChanged(object sender, TextChangedEventArgs e)
@@ -296,7 +289,7 @@ namespace WordLyricGUIEditor
             float rt;
             if(player != null && float.TryParse(MusicPlayerRateTextBox.Text,out rt))
             {
-                player.SetRate(rt);
+                controller.ClockRate = rt;
             }
         }
         #endregion
@@ -335,6 +328,7 @@ namespace WordLyricGUIEditor
         void UpdateUI()
         {
             Update_time_textview();
+            ChangeProgressSliderMute(controller.Position.TotalMilliseconds);
         }
 
         DispatcherTimer UpdateUITimer = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(50) };
@@ -344,11 +338,12 @@ namespace WordLyricGUIEditor
             if (player == null)
                 all_time_textview.Text = "??";
             else
-                all_time_textview.Text = ToTimeFormatString(player.Length);
+                all_time_textview.Text = ToTimeFormatString((long)((player?.PlaybackSession?.NaturalDuration)?.TotalMilliseconds));
             if (player == null)
                 now_time_textview.Text = "??";
             else
                 now_time_textview.Text = ToTimeFormatString(GetNowTimeMs());
+
         }
 
         DispatcherTimer LrcUpdateTimer = new DispatcherTimer()
@@ -356,7 +351,22 @@ namespace WordLyricGUIEditor
             Interval = TimeSpan.FromMilliseconds(50)
         };
 
-
+        int SliderValueChangedHangup = 0;
+        private void ProgressSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (SliderValueChangedHangup == 0)
+            {
+                
+                controller.Duration = null;
+                controller.Position = TimeSpan.FromMilliseconds(ProgressSlider.Value);
+            }
+        }
+        private void ChangeProgressSliderMute(double val)
+        {
+            SliderValueChangedHangup++;
+            ProgressSlider.Value = val;
+            SliderValueChangedHangup--;
+        }
         #endregion
 
 

@@ -37,7 +37,7 @@ namespace WordLyricGUIEditor
 
         private void TimeAlignButtonClick(object sender, RoutedEventArgs e)
         {
-            TimeAlignTextBox.Text = (mainPage.player?.Time ?? 0).ToString();
+            TimeAlignTextBox.Text = mainPage.GetNowTimeMs().ToString();
         }
 
         private void TimeAlignTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -67,12 +67,12 @@ namespace WordLyricGUIEditor
         }
         private void SyncLoopButtonClick(object sender, RoutedEventArgs e)
         {
-            if(mainPage.player != null)
+            //if(mainPage.player != null)
             {
                 tickms.Add(new TickPoint()
                 {
                     id = tickms.Count,
-                    timems = mainPage.player.Time
+                    timems = mainPage.GetNowTimeMs()
                 });
             }
             if(tickms.Count > 1)

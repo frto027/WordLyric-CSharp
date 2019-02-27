@@ -63,7 +63,7 @@ namespace WordLyricGUIEditor
         }
         private void CanvasAnimatedControl_Draw(Microsoft.Graphics.Canvas.UI.Xaml.ICanvasAnimatedControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasAnimatedDrawEventArgs args)
         {
-            if (mainPage?.player?.IsPlaying ?? false)
+            
             {
                 double value = SeekTo(mainPage.GetNowTimeMs());
                 // MainPage.LogPrint($"STime {value}");
@@ -73,7 +73,9 @@ namespace WordLyricGUIEditor
                 args.DrawingSession.DrawLine(0, (float)sender.Size.Height * 0.25f, (float)SmallRect * (float)sender.Size.Width * 0.7f, (float)sender.Size.Height * 0.25f, Colors.Green);
                 args.DrawingSession.DrawLine((float)sender.Size.Width, 0, (float)sender.Size.Width, (float)sender.Size.Height, Colors.Gray);
                 args.DrawingSession.DrawRectangle(0, (float)sender.Size.Height * 0.5f, (float)(sender.Size.Width * value), (float)sender.Size.Height * 0.5f, Colors.Blue);
-            }else
+            }
+
+            if ((mainPage?.GetPlayStatus() != Windows.Media.Playback.MediaPlaybackState.Playing))
                 args.DrawingSession.DrawRectangle(0, 0, (float)sender.Size.Width, (float)sender.Size.Height, Colors.Red);
 
         }
