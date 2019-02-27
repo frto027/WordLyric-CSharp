@@ -133,16 +133,16 @@ namespace WordLyricGUIEditor
             UpdateUI();
         }
 
-        public long GetNowTimeMs()
+        public double GetNowTimeMs()
         {
-            return (long)controller.Position.TotalMilliseconds;
+            return controller.Position.TotalMilliseconds;
         }
         public MediaPlaybackState GetPlayStatus()
         {
             return player?.PlaybackSession?.PlaybackState ?? MediaPlaybackState.None;
         }
 
-        public void PlayBetween(long startms,long endms)
+        public void PlayBetween(double startms, double endms)
         {
             LogPrint($"bet {startms} {endms}");
             controller.Duration = TimeSpan.FromMilliseconds(endms);
@@ -190,7 +190,7 @@ namespace WordLyricGUIEditor
         }
         private void UpdateLyricProgress()
         {
-            lyricAdapter.SeekTo(GetNowTimeMs() / 1000f);
+            lyricAdapter.SeekTo((float)GetNowTimeMs() / 1000f);
         }
         private void LoadLyric(byte[] lrcbyte)
         {
@@ -342,7 +342,7 @@ namespace WordLyricGUIEditor
             if (player == null)
                 now_time_textview.Text = "??";
             else
-                now_time_textview.Text = ToTimeFormatString(GetNowTimeMs());
+                now_time_textview.Text = ToTimeFormatString((long)GetNowTimeMs());
 
         }
 

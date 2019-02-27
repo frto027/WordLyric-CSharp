@@ -13,13 +13,13 @@
             <TextBlock Margin="5">对拍器(单位:ms)</TextBlock>
             <StackPanel Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center">对齐时间：</TextBlock>
-                <TextBox VerticalAlignment="Center" x:Name="TimeAlignTextBox" TextChanged="TimeAlignTextBox_TextChanged" InputScope="Digits" />
+                <TextBox VerticalAlignment="Center" Width="150" x:Name="TimeAlignTextBox" TextChanged="TimeAlignTextBox_TextChanged" InputScope="Digits" />
                 <Button Content="对齐" ClickMode="Press" Click="TimeAlignButtonClick"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
 
                 <TextBlock VerticalAlignment="Center">间隔时间：</TextBlock>
-                <TextBox VerticalAlignment="Center" InputScope="Digits" x:Name="SyncLoopTimeTextBox" TextChanged="SyncLoopTimeTextBox_TextChanged"/>
+                <TextBox VerticalAlignment="Center" Width="150" InputScope="Digits" x:Name="SyncLoopTimeTextBox" TextChanged="SyncLoopTimeTextBox_TextChanged"/>
                 <Button Content="起新拍" Click="NewLoopButtonClick"/>
                 <Button Content="对拍" ClickMode="Press" Click="SyncLoopButtonClick"/>
             </StackPanel>

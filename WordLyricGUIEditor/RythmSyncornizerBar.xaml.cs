@@ -20,10 +20,10 @@ namespace WordLyricGUIEditor
 {
     public sealed partial class RythmSyncornizerBar : UserControl
     {
-        public long StartMs;
-        public long BetweenMs {
-            get => (long) (_BetweenMs / Factor);
-            set => _BetweenMs = (long)(value * Factor);
+        public double StartMs;
+        public double BetweenMs {
+            get => (double) (_BetweenMs / Factor);
+            set => _BetweenMs = (double)(value * Factor);
         }
         public double Factor {
             get => _Factor;
@@ -35,14 +35,14 @@ namespace WordLyricGUIEditor
 
         private double _Factor;
 
-        private long _BetweenMs;
+        private double _BetweenMs;
 
         public MainPage mainPage;
 
         public event Action<RythmSyncornizerBar> OnRemoveMe;
 
 
-        private double SeekTo(long TimeMs)
+        private double SeekTo(double TimeMs)
         {
             if (_BetweenMs == 0)
                 return 0;
@@ -65,7 +65,7 @@ namespace WordLyricGUIEditor
         {
             
             {
-                double value = SeekTo(mainPage.GetNowTimeMs());
+                double value = SeekTo((float)mainPage.GetNowTimeMs());
                 // MainPage.LogPrint($"STime {value}");
                 double SmallRect = (0.5 - Math.Abs(value - 0.5))*2;
 
@@ -91,7 +91,7 @@ namespace WordLyricGUIEditor
             {
                 return;
             }
-            long TimeMs = mainPage.GetNowTimeMs();
+            double TimeMs = mainPage.GetNowTimeMs();
             if (StartMs > TimeMs)
             {
                 StartMs %= _BetweenMs;

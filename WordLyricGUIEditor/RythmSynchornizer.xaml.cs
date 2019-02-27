@@ -25,7 +25,7 @@ namespace WordLyricGUIEditor
         public struct TickPoint
         {
             public int id;
-            public long timems;
+            public double timems;
         };
 
         public List<TickPoint> tickms = new List<TickPoint>();
@@ -42,8 +42,8 @@ namespace WordLyricGUIEditor
 
         private void TimeAlignTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            long ms;
-            if (!long.TryParse(TimeAlignTextBox.Text, out ms))
+            double ms;
+            if (!double.TryParse(TimeAlignTextBox.Text, out ms))
                 ms = 0;
             foreach(RythmSyncornizerBar bar in BarPanel.Children)
             {
@@ -52,8 +52,8 @@ namespace WordLyricGUIEditor
         }
         private void SyncLoopTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            long ms;
-            if (!long.TryParse(SyncLoopTimeTextBox.Text, out ms))
+            double ms;
+            if (!double.TryParse(SyncLoopTimeTextBox.Text, out ms))
                 ms = 0;
             foreach (RythmSyncornizerBar bar in BarPanel.Children)
             {
@@ -97,8 +97,8 @@ namespace WordLyricGUIEditor
             y_avg /= tickms.Count;
             double k = (xiyi - tickms.Count * x_avg * y_avg) / (x_multi_plus - tickms.Count * x_avg * x_avg);
             double b = y_avg - k * x_avg;
-            long startms = (long)b;
-            long loopms = (long)k;
+            double startms = b;
+            double loopms = k;
 
             TimeAlignTextBox.Text = startms.ToString();
             SyncLoopTimeTextBox.Text = loopms.ToString();
@@ -117,9 +117,9 @@ namespace WordLyricGUIEditor
             }
             
             if (!string.IsNullOrWhiteSpace(TimeAlignTextBox.Text))
-                bar.StartMs = long.Parse(TimeAlignTextBox.Text);
+                bar.StartMs = double.Parse(TimeAlignTextBox.Text);
             if (!string.IsNullOrWhiteSpace(SyncLoopTimeTextBox.Text))
-                bar.BetweenMs = long.Parse(SyncLoopTimeTextBox.Text);
+                bar.BetweenMs = double.Parse(SyncLoopTimeTextBox.Text);
 
             bar.mainPage = mainPage;
             bar.OnRemoveMe += (b) =>
