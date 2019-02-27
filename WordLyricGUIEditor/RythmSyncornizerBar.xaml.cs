@@ -83,6 +83,8 @@ namespace WordLyricGUIEditor
         private void RemoveButtonClick(object sender, RoutedEventArgs e)
         {
             OnRemoveMe?.Invoke(this);
+            cvs.RemoveFromVisualTree();
+            cvs = null;
         }
 
         private void PlayButtonClick(object sender, RoutedEventArgs e)

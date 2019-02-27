@@ -21,7 +21,7 @@
             
         </StackPanel>
         
-        <canvas:CanvasAnimatedControl Margin="5" Draw="CanvasAnimatedControl_Draw" ClearColor="White" Grid.Column="1" Height="30" Width="180">
+        <canvas:CanvasAnimatedControl Margin="5" x:Name="cvs" Draw="CanvasAnimatedControl_Draw" ClearColor="White" Grid.Column="1" Height="30" Width="180">
             
         </canvas:CanvasAnimatedControl>
         
