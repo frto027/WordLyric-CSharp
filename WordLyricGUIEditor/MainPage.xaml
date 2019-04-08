@@ -10,7 +10,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="471*" MinWidth="290"/>
+            <ColumnDefinition Width="471*" MinWidth="360"/>
             <ColumnDefinition Width="809*"/>
         </Grid.ColumnDefinitions>
         <!-- Left -->
@@ -29,7 +29,7 @@
                     </Border>
                 </StackPanel>
                 <StackPanel Margin="5">
-                    <Slider x:Name="ProgressSlider" ValueChanged="ProgressSlider_ValueChanged" ></Slider>
+                    <Slider x:Name="ProgressSlider" ValueChanged="ProgressSlider_ValueChanged" IsEnabled="False"></Slider>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button Content="载入歌曲" Margin="5" Click="LoadMusicButtonClick"/>
@@ -40,7 +40,7 @@
 
                 <StackPanel Orientation="Horizontal">
                     <Button Content="载入歌词" Margin="5" Click="LoadLyricButtonClick"/>
-                    <Button Content="重载歌词" Margin="5"/>
+                    <Button Content="重载歌词" Margin="5" Click="ReloadLrcButtonClick"/>
                     <TextBlock VerticalAlignment="Center">速率</TextBlock>
                     <TextBox Text="1" VerticalAlignment="Center" InputScope="Digits" x:Name="MusicPlayerRateTextBox" TextChanged="MusicPlayerRateTextBoxChanged"/>
                 </StackPanel>
@@ -90,8 +90,10 @@
                 </Border>
             </StackPanel>
         </ScrollViewer>
+        <Border Grid.Column="1" BorderThickness="2" Margin="5" BorderBrush="Blue">
+            <wordlyricguieditor:LyricEditbar x:Name="lrcEditorBar"></wordlyricguieditor:LyricEditbar>
+        </Border>
         
-
      
     </Grid>
 </Page>

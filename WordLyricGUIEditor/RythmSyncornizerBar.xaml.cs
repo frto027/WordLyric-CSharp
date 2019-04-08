@@ -14,7 +14,6 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-//https://go.microsoft.com/fwlink/?LinkId=234236 上介绍了“用户控件”项模板
 
 namespace WordLyricGUIEditor
 {
@@ -72,7 +71,7 @@ namespace WordLyricGUIEditor
                 args.DrawingSession.DrawRectangle(0, 0, (float)sender.Size.Width * 0.7f, (float)sender.Size.Height * 0.5f, Colors.Gray);
                 args.DrawingSession.DrawLine(0, (float)sender.Size.Height * 0.25f, (float)SmallRect * (float)sender.Size.Width * 0.7f, (float)sender.Size.Height * 0.25f, Colors.Green);
                 args.DrawingSession.DrawLine((float)sender.Size.Width, 0, (float)sender.Size.Width, (float)sender.Size.Height, Colors.Gray);
-                args.DrawingSession.DrawRectangle(0, (float)sender.Size.Height * 0.5f, (float)(sender.Size.Width * value), (float)sender.Size.Height * 0.5f, Colors.Blue);
+                args.DrawingSession.FillRectangle(0, (float)sender.Size.Height * 0.5f, (float)(sender.Size.Width * value), (float)sender.Size.Height * 0.5f, Colors.Blue);
             }
 
             if ((mainPage?.GetPlayStatus() != Windows.Media.Playback.MediaPlaybackState.Playing))

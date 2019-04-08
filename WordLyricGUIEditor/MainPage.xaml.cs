@@ -44,6 +44,7 @@ namespace WordLyricGUIEditor
             InitializeWordLyricAdapter();
             InitializeRythmSyncComponent();
             InitializeUIUpdate();
+            InitializeLrcEditorUI();
 
             
         }
@@ -112,6 +113,8 @@ namespace WordLyricGUIEditor
             }
             */
             //UpdateUI();
+            player.Source = null;
+            ProgressSlider.IsEnabled = false;
         }
 
         private async Task LoadMedia(Windows.Storage.StorageFile mediapath)
@@ -129,7 +132,9 @@ namespace WordLyricGUIEditor
             player.Source = MediaSource.CreateFromMediaStreamSource(source);
             */
             player.Source = MediaSource.CreateFromStorageFile(mediapath); //MediaSource.CreateFromMediaStreamSource(FFmpegInterop.FFmpegInteropMSS.CreateFFmpegInteropMSSFromStream(stream, true, false).GetMediaStreamSource());
-            
+
+            ProgressSlider.IsEnabled = true;
+
             UpdateUI();
         }
 
@@ -206,9 +211,8 @@ namespace WordLyricGUIEditor
         {
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
             picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.MusicLibrary;
-            picker.FileTypeFilter.Add(".mp3");
-            picker.FileTypeFilter.Add(".mkv");
-
+            picker.FileTypeFilter.Add("*");
+            
             Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
             
             if(file != null)
@@ -329,6 +333,7 @@ namespace WordLyricGUIEditor
         {
             Update_time_textview();
             ChangeProgressSliderMute(controller.Position.TotalMilliseconds);
+
         }
 
         DispatcherTimer UpdateUITimer = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(50) };
@@ -356,19 +361,32 @@ namespace WordLyricGUIEditor
         {
             if (SliderValueChangedHangup == 0)
             {
-                
                 controller.Duration = null;
                 controller.Position = TimeSpan.FromMilliseconds(ProgressSlider.Value);
             }
         }
         private void ChangeProgressSliderMute(double val)
         {
-            SliderValueChangedHangup++;
-            ProgressSlider.Value = val;
-            SliderValueChangedHangup--;
+            lock (ProgressSlider)
+            {
+                SliderValueChangedHangup++;
+                ProgressSlider.Value = val;
+                SliderValueChangedHangup--;
+            }
+        }
+
+        #endregion
+        #region LrcEditorRegion
+
+        private void InitializeLrcEditorUI()
+        {
+            lrcEditorBar.GetMusicPlayTimems = GetNowTimeMs;
+        }
+
+        private void ReloadLrcButtonClick(object sender, RoutedEventArgs e)
+        {
+            lrcEditorBar.InitAreaListDefault((float)(player?.PlaybackSession?.NaturalDuration)?.TotalMilliseconds);
         }
         #endregion
-
-
     }
 }

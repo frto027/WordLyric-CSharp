@@ -6,10 +6,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     d:DesignHeight="300"
     d:DesignWidth="400">
 
     <Grid>
         <!-- TODO -->
+        <!--
+        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">Lyric Edit Bar</TextBlock>
+        -->
+        <canvas:CanvasAnimatedControl x:Name="cvs" PointerPressed="Cvs_PointerPressed" PointerReleased="Cvs_PointerReleased" PointerMoved="Cvs_PointerMoved" PointerExited="Cvs_PointerExited" Draw="CanvasAnimatedControl_Draw" PointerWheelChanged="Cvs_PointerWheelChanged"></canvas:CanvasAnimatedControl>
     </Grid>
 </UserControl>
