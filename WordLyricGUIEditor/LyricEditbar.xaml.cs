@@ -34,6 +34,7 @@ namespace WordLyricGUIEditor
         public float VerticalOffset = 0f;
         public float VerticalHeight { get; private set; }
 
+        private float VerticalBarMax { get => VerticalHeight - 20; }
         public enum Layers { WAVE,  CUSOUR,TEXT,EMPTY };
 
         //鼠标按下事件触发
@@ -55,6 +56,13 @@ namespace WordLyricGUIEditor
             pixHeights.Add(Layers.EMPTY, 1f);
 
             InitPixHeightMap();
+
+            //滚动条相关设置
+            FlushProgressBar();
+            bar.ValueChanged += (_, __) => {
+                if (VerticalBarMax >= bar.Value)
+                    VerticalOffset = -(float)bar.Value;
+            };
         }
 
         public void SetLayerHeight(Layers layer,float height)
@@ -101,7 +109,12 @@ namespace WordLyricGUIEditor
                 areaList.AddLast(new AreaBase() { areaType = AreaBase.AreaType.NoLyric, timewide = timewide });
 
             areaListLock.ExitWriteLock();
-           
+
+        }
+        void FlushProgressBar()
+        {
+            bar.Maximum = VerticalBarMax;
+            bar.Value = -VerticalOffset;
         }
 
         private void CanvasAnimatedControl_Draw(Microsoft.Graphics.Canvas.UI.Xaml.ICanvasAnimatedControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasAnimatedDrawEventArgs args)
@@ -170,6 +183,7 @@ namespace WordLyricGUIEditor
                 session.DrawRectangle(allrect, Colors.Black);
                 return true;
             }
+
             //同块下一行
             void ToLayer(Layers layer)
             {
@@ -351,8 +365,9 @@ namespace WordLyricGUIEditor
             VerticalOffset += e.GetCurrentPoint(null).Properties.MouseWheelDelta * 0.8f;
             if (-VerticalOffset < 0)
                 VerticalOffset = 0;
-            if (-VerticalOffset > VerticalHeight - 20)
-                VerticalOffset = -(VerticalHeight - 20);
+            if (-VerticalOffset > VerticalBarMax)
+                VerticalOffset = -(VerticalBarMax);
+            FlushProgressBar();
         }
     }
 

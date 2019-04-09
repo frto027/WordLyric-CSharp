@@ -8,13 +8,19 @@
     mc:Ignorable="d"
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignWidth="400" >
 
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
         <!-- TODO -->
         <!--
         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">Lyric Edit Bar</TextBlock>
         -->
-        <canvas:CanvasAnimatedControl x:Name="cvs" PointerPressed="Cvs_PointerPressed" PointerReleased="Cvs_PointerReleased" PointerMoved="Cvs_PointerMoved" PointerExited="Cvs_PointerExited" Draw="CanvasAnimatedControl_Draw" PointerWheelChanged="Cvs_PointerWheelChanged"></canvas:CanvasAnimatedControl>
+        <canvas:CanvasAnimatedControl Grid.Column="0" x:Name="cvs" PointerPressed="Cvs_PointerPressed" PointerReleased="Cvs_PointerReleased" PointerMoved="Cvs_PointerMoved" PointerExited="Cvs_PointerExited" Draw="CanvasAnimatedControl_Draw" PointerWheelChanged="Cvs_PointerWheelChanged" HorizontalAlignment="Stretch" Margin="0,0,0,0" Grid.RowSpan="2" VerticalAlignment="Stretch"/>
+        <ScrollBar x:Name="bar" Grid.Column="1" AllowDrop="True" Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Stretch" Maximum="100" Value="54" CanDrag="True" IndicatorMode="MouseIndicator" />
     </Grid>
 </UserControl>
