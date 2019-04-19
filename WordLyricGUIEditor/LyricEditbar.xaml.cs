@@ -40,6 +40,11 @@ namespace WordLyricGUIEditor
         //鼠标按下事件触发
         public delegate void MouseClickProgressBarEvent(Layers layer, float timems);
         public event MouseClickProgressBarEvent OnMouseClickProgressBar;
+        //歌曲滚动相关
+        //public float ScrollRate { set; private get; } = 0;//滚动速率，相对于歌曲播放
+        public bool LockScrollRate { set; private get; } = false;
+        public float LockScrollOffset { set; private get; } = 40;
+
         /// <summary>
         /// 歌曲播放当前进度，显示在wave条中
         /// </summary>
@@ -119,9 +124,16 @@ namespace WordLyricGUIEditor
 
         private void CanvasAnimatedControl_Draw(Microsoft.Graphics.Canvas.UI.Xaml.ICanvasAnimatedControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasAnimatedDrawEventArgs args)
         {
-            
-
             float MaxWidth = (float)sender.Size.Width;
+            /*
+            {//处理自动滚动
+                float ScrollRate = this.ScrollRate;
+                if (ScrollRate > 0)
+                {
+                    VerticalOffset -= ScrollRate * allPixHeight * (float)sender.TargetElapsedTime.TotalMilliseconds / (MaxWidth / pixMulti);
+                }
+            }
+            */
             float MaxHeight = (float)sender.Size.Height;
 
             float heightTail = VerticalOffset;
@@ -172,7 +184,18 @@ namespace WordLyricGUIEditor
                 }
 
                 if (heightTail > MaxHeight || heightTail + allPixHeight < 0)
+                {
+                    if (LockScrollRate)
+                    {
+                        //当指针所在行是当前行时，需要绘制光标，以触发坐标调整
+                        float curTimems = (float)(GetMusicPlayTimems?.Invoke() ?? 0);
+                        if (curTimems >= blockBeginTime && curTimems <= blockEndTime)
+                            return true;
+                    }
                     return false;
+                }
+                    
+
 
                 currentLayer = (Layers)Enum.GetValues(typeof(Layers)).GetValue(0);
                 pixHeights.TryGetValue(currentLayer, out float lheight);
@@ -234,6 +257,14 @@ namespace WordLyricGUIEditor
                 {
                     float x = getRectXByTimeMs(curTimems);
                     session.DrawLine(x, (float)rect.Y, x, (float)(rect.Y + rect.Height), Colors.DarkGreen, 1);
+
+                    //锁定光标坐标，更新滚动
+                    if(LockScrollRate)
+                    {
+                        float curHeight = heightTail - initHeightTail;
+                        curHeight += allPixHeight * (x / MaxWidth);
+                        VerticalOffset = LockScrollOffset - curHeight;
+                    }
                 }
             }
             //绘制Wave块
@@ -362,11 +393,19 @@ namespace WordLyricGUIEditor
 
         private void Cvs_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
+            if (LockScrollRate)
+            {
+                LockScrollOffset += e.GetCurrentPoint(null).Properties.MouseWheelDelta * 0.1f;
+                return;
+            }
+                
             VerticalOffset += e.GetCurrentPoint(null).Properties.MouseWheelDelta * 0.8f;
             if (-VerticalOffset < 0)
                 VerticalOffset = 0;
             if (-VerticalOffset > VerticalBarMax)
                 VerticalOffset = -(VerticalBarMax);
+
+
             FlushProgressBar();
         }
     }

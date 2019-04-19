@@ -40,7 +40,7 @@
 
                 <StackPanel Orientation="Horizontal">
                     <Button Content="载入歌词" Margin="5" Click="LoadLyricButtonClick"/>
-                    <Button Content="重载歌词" Margin="5" Click="ReloadLrcButtonClick"/>
+                    <Button Content="重载歌词" Margin="5" />
                     <TextBlock VerticalAlignment="Center">速率</TextBlock>
                     <TextBox Text="1" VerticalAlignment="Center" InputScope="Digits" x:Name="MusicPlayerRateTextBox" TextChanged="MusicPlayerRateTextBoxChanged"/>
                 </StackPanel>
@@ -86,6 +86,15 @@
                     <StackPanel>
                         <TextBlock >日志文件</TextBlock>
                         <TextBox Margin="5" x:Name="LogFileTextBox" Text="unset" IsReadOnly="True"></TextBox>
+                    </StackPanel>
+                </Border>
+                <Border Margin="5" BorderBrush="Blue" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock>歌词编辑器控制</TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="加载歌词" Margin="5" Click="ReloadLrcButtonClick"/>
+                            <CheckBox x:Name="lrcEditorAutoscrollCheckBox" Margin="5" Content="自动滚行" Checked="LrcEditorAutoScrollEnable" Unchecked="LrcEditorAutoScrollDisabled"></CheckBox>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>

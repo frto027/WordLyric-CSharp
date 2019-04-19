@@ -266,6 +266,7 @@ namespace WordLyricGUIEditor
 
             UpdateUI();
             UpdateLyricProgress();
+            UpdateLrcEditBarAutoScroll();
         }
 
         private void PlayButtonClick(object sender, RoutedEventArgs e)
@@ -276,11 +277,14 @@ namespace WordLyricGUIEditor
             controller.Resume();
             controller.Position = oldtime;
             LrcUpdateTimer.Start();
+
+            UpdateLrcEditBarAutoScroll(true);
         }
 
         private void PauseButtonClick(object sender, RoutedEventArgs e)
         {
             player?.TimelineController?.Pause();
+            UpdateLrcEditBarAutoScroll();
         }
         private void VolumeSliderSlide(object sender, RangeBaseValueChangedEventArgs e)
         {
@@ -295,7 +299,25 @@ namespace WordLyricGUIEditor
             {
                 controller.ClockRate = rt;
             }
+            UpdateLrcEditBarAutoScroll();
         }
+
+        private void ReloadLrcButtonClick(object sender, RoutedEventArgs e)
+        {
+            lrcEditorBar.InitAreaListDefault((float)(player?.PlaybackSession?.NaturalDuration)?.TotalMilliseconds);
+        }
+
+        private void LrcEditorAutoScrollEnable(object sender, RoutedEventArgs e)
+        {
+            UpdateLrcEditBarAutoScroll();
+        }
+
+        private void LrcEditorAutoScrollDisabled(object sender, RoutedEventArgs e)
+        {
+            UpdateLrcEditBarAutoScroll();
+        }
+
+
         #endregion
 
         private static string ToTimeFormatString(long ms)
@@ -383,10 +405,24 @@ namespace WordLyricGUIEditor
             lrcEditorBar.GetMusicPlayTimems = GetNowTimeMs;
         }
 
-        private void ReloadLrcButtonClick(object sender, RoutedEventArgs e)
+        private void UpdateLrcEditBarAutoScroll(bool willPlay = false)
         {
-            lrcEditorBar.InitAreaListDefault((float)(player?.PlaybackSession?.NaturalDuration)?.TotalMilliseconds);
+            /*
+            float.TryParse(MusicPlayerRateTextBox.Text, out float rate);
+
+            lrcEditorBar.ScrollRate =( lrcEditorAutoscrollCheckBox.IsChecked ?? false)
+                &&(willPlay || controller?.State == MediaTimelineControllerState.Running) ?
+                rate : 0;
+                */
+            lrcEditorBar.LockScrollRate = lrcEditorAutoscrollCheckBox.IsChecked ?? false;
         }
+
+
+
         #endregion
+
+
+
+
     }
 }
