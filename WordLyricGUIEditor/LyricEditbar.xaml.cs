@@ -100,7 +100,7 @@ namespace WordLyricGUIEditor
             public float timewide;
             public bool isBeginBlock = true;
 
-            public enum AreaType { NoLyric };
+            public enum AreaType { NoLyric,Lyric_Word,Lyric_Word_End };
             public AreaType areaType = AreaType.NoLyric;
 
             public string TypeString { get { return areaType.ToString(); } }
